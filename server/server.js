@@ -7,6 +7,7 @@ const employeeRoutes = require('./routes/employeeRoutes');
 const app = express();
 
 // Middleware
+app.use(express.urlencoded({ extended: true })); // To parse URL-encoded request bodies
 app.use(express.json()); // To parse JSON request bodies
 app.use(cors()); // Enable CORS for cross-origin requests
  app.use("/api/auth", authRoutes); // Use the authentication routes

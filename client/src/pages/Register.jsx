@@ -1,33 +1,54 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate instead of useHistory
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
 
 const Register = () => {
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('employee'); // Default role is 'employee'
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Initialize navigate
+  const [formData, setFormData] = useState({
+    name: "",
+    username: "",
+    emailId: "", // ✅ Must match backend field
+    password: "",
+    role: "employee", // ✅ Default to "employee"
+  });
 
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // ✅ Handle Input Change
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // ✅ Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
-    const newUser = { name, username, email, password, role };
-    console.log('Submitting user:', newUser);  // Debugging step to verify data
+    console.log("🚀 Submitting User Data:", formData); // ✅ Debugging
+
+    // ✅ Check for Empty Fields Before Sending Request
+    for (const key in formData) {
+      if (!formData[key].trim()) {
+        setError(`❌ ${key} is required`);
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', newUser);
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const response = await axios.post(`${API_URL}/api/auth/register`, formData);
+
       if (response.status === 201) {
-        navigate('/login'); // Redirect on success
+        console.log("✅ Registration Successful:", response.data);
+        alert("Registration Successful! Please login.");
+        navigate("/login");
       }
     } catch (err) {
-      console.error('Registration error:', err); // Log error details
-      setError(err.response?.data?.message || 'An error occurred. Please try again.');
+      console.error("❌ Registration Error:", err.response?.data || err.message);
+      setError(err.response?.data?.message || "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -35,68 +56,65 @@ const Register = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit} // Trigger handleSubmit when the form is submitted
-        className="bg-white p-6 rounded-lg shadow-md w-full max-w-md"
-      >
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-4">Register</h1>
 
-        {/* Error Message */}
+        {/* ✅ Display Error Messages */}
         {error && <div className="bg-red-100 text-red-600 p-2 rounded mb-4">{error}</div>}
 
-        {/* Name Input */}
         <div className="mb-4">
           <input
             type="text"
+            name="name"
             placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={formData.name}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
           />
         </div>
 
-        {/* Username Input */}
         <div className="mb-4">
           <input
             type="text"
+            name="username"
             placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={formData.username}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
           />
         </div>
 
-        {/* Email Input */}
         <div className="mb-4">
           <input
             type="email"
+            name="emailId" // ✅ Matches backend field
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.emailId}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
           />
         </div>
 
-        {/* Password Input */}
         <div className="mb-4">
           <input
             type="password"
+            name="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-lg"
             required
           />
         </div>
 
-        {/* Role Selection (Admin or Employee) */}
         <div className="mb-4">
           <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-lg"
           >
             <option value="employee">Employee</option>
@@ -104,23 +122,20 @@ const Register = () => {
           </select>
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded-lg"
+          className="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition duration-200"
           disabled={loading}
         >
-          {loading ? 'Registering...' : 'Register'}
+          {loading ? "Registering..." : "Register"}
         </button>
 
-        <div className="mt-4 text-center">
-          <p>
-            Already have an account?{' '}
-            <a href="/login" className="text-blue-500 hover:underline">
-              Login here
-            </a>
-          </p>
-        </div>
+        <p className="text-center mt-4">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-500 hover:underline">
+            Login here
+          </Link>
+        </p>
       </form>
     </div>
   );

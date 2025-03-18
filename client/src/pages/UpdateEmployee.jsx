@@ -1,16 +1,38 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
 
 const EditEmployee = () => {
-  const [name, setName] = useState('');
-  const [jobTitle, setJobTitle] = useState('');
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    name: "",
+    emailId: "",
+    jobTitle: "",
+    city: "",
+    state: "",
+    paymentMethod: "",
+    language: "",
+    paidVacationDays: 0,
+    paidSickDays: 0,
+    dateOfBirth: "",
+    dateOfJoining: "",
+  });
+
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { id } = useParams();
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
-  const user = token ? JSON.parse(atob(token.split('.')[1])) : null;
+  const token = localStorage.getItem("token");
+
+  // ✅ Decode JWT token safely
+  let user = null;
+  if (token) {
+    try {
+      const decoded = JSON.parse(atob(token.split(".")[1]));
+      user = decoded;
+    } catch (error) {
+      console.error("❌ Error decoding token:", error);
+    }
+  }
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
@@ -18,32 +40,54 @@ const EditEmployee = () => {
         const res = await axios.get(`http://localhost:5000/api/employee/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setName(res.data.name);
-        setJobTitle(res.data.jobTitle);
+
+        // ✅ Populate form fields with fetched employee data
+        if (res.data) {
+          setFormData({
+            name: res.data.name || "",
+            emailId: res.data.emailId || "",
+            jobTitle: res.data.jobTitle || "",
+            city: res.data.city || "",
+            state: res.data.state || "",
+            paymentMethod: res.data.paymentMethod || "",
+            language: res.data.language || "",
+            paidVacationDays: res.data.paidVacationDays || 0,
+            paidSickDays: res.data.paidSickDays || 0,
+            dateOfBirth: res.data.dateOfBirth ? res.data.dateOfBirth.split("T")[0] : "",
+            dateOfJoining: res.data.dateOfJoining ? res.data.dateOfJoining.split("T")[0] : "",
+          });
+        }
       } catch (err) {
-        setError('Could not fetch employee details.');
+        console.error("❌ Error fetching employee details:", err);
+        setError("Could not fetch employee details.");
       }
     };
 
-    if (user && (user.role === 'admin' || user.id === id)) {
+    if (user && (user.role === "admin" || user.userId === id)) {
       fetchEmployeeData();
     } else {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
-  }, [id, token, user, navigate]);
+  }, [id, navigate, token]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const updatedEmployee = { name, jobTitle };
-      await axios.put(`http://localhost:5000/api/employee/update/${id}`, updatedEmployee, {
+      await axios.put(`http://localhost:5000/api/employee/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      navigate('/dashboard');
+
+      alert("✅ Employee updated successfully!");
+      navigate("/dashboard");
     } catch (err) {
-      setError('Failed to update employee details.');
+      console.error("❌ Error updating employee:", err);
+      setError("Failed to update employee details.");
     } finally {
       setLoading(false);
     }
@@ -54,31 +98,24 @@ const EditEmployee = () => {
       <h2 className="text-2xl font-bold text-center mb-4">Edit Employee</h2>
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-gray-700">Name</label>
-          <input 
-            type="text" 
-            value={name} 
-            onChange={(e) => setName(e.target.value)} 
-            required 
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
-          />
-        </div>
-        <div>
-          <label className="block text-gray-700">Job Title</label>
-          <input 
-            type="text" 
-            value={jobTitle} 
-            onChange={(e) => setJobTitle(e.target.value)} 
-            required 
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
-          />
-        </div>
-        <button 
-          type="submit" 
-          disabled={loading} 
-          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition duration-200 disabled:bg-gray-400">
-          {loading ? 'Updating...' : 'Update'}
+        {Object.keys(formData).map((field) => (
+          <div key={field}>
+            <label className="block text-gray-700">{field.replace(/([A-Z])/g, " $1")}</label>
+            <input
+              type={field.includes("date") ? "date" : "text"}
+              name={field}
+              value={formData[field] || ""}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+            />
+          </div>
+        ))}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition duration-200 disabled:bg-gray-400"
+        >
+          {loading ? "Updating..." : "Update"}
         </button>
       </form>
     </div>
@@ -86,4 +123,3 @@ const EditEmployee = () => {
 };
 
 export default EditEmployee;
-

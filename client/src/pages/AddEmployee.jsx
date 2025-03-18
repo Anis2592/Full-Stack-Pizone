@@ -1,24 +1,25 @@
+ 
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function AddEmployee({ setShowForm, selectedEmployee, fetchEmployees }) {
   const initialFormState = {
     name: "",
-    emailid: "",
+    emailId: "",
     jobTitle: "",
     city: "",
     state: "",
     paymentMethod: "",
     language: "",
-    paidVacationDays: "",
-    paidSickDays: "",
-    dateofbirth: "",
-    dateofjoining: "",
+    paidVacationDays: 0,
+    paidSickDays: 0,
+    dateOfBirth: "",
+    dateOfJoining: "",
   };
 
   const [formData, setFormData] = useState(initialFormState);
 
-  // Populate form when editing an existing employee
   useEffect(() => {
     if (selectedEmployee) {
       setFormData({
@@ -32,33 +33,58 @@ export default function AddEmployee({ setShowForm, selectedEmployee, fetchEmploy
   }, [selectedEmployee]);
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "paidVacationDays" || name === "paidSickDays" ? Number(value) : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Convert dates to ISO format before sending to backend
+  
     const updatedFormData = {
       ...formData,
-      dateofbirth: formData.dateofbirth ? new Date(formData.dateofbirth).toISOString() : null,
-      dateofjoining: formData.dateofjoining ? new Date(formData.dateofjoining).toISOString() : null,
+      dateOfBirth: formData.dateOfBirth
+        ? new Date(formData.dateOfBirth).toISOString().split("T")[0]
+        : "",
+      dateOfJoining: formData.dateOfJoining
+        ? new Date(formData.dateOfJoining).toISOString().split("T")[0]
+        : "",
     };
-
+  
+    console.log("🚀 Sending Data:", updatedFormData);
+  
     try {
-      if (selectedEmployee) {
-        await axios.put(`http://localhost:5000/api/employee/${selectedEmployee._id}`, updatedFormData);
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const token = localStorage.getItem("token");
+  
+      const response = await axios.post(`${API_URL}/api/employee`, updatedFormData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      console.log("✅ Employee Added Successfully:", response.data);
+  
+      if (typeof setShowForm !== "function") {
+        console.error("❌ setShowForm is not a function");
       } else {
-        await axios.post("http://localhost:5000/api/employee", updatedFormData);
+        setShowForm(false);
       }
-
-      setShowForm(false);
-      fetchEmployees(); // Refresh employee list in Admin Panel
+  
+      fetchEmployees(); // Refresh the employee list
+      setShowForm(false)
     } catch (error) {
-      console.error("Error saving employee:", error);
+      console.error("❌ Error saving employee:", error.response ? error.response.data : error.message);
+      alert(
+        error.response
+          ? `Error: ${JSON.stringify(error.response.data, null, 2)}`
+          : " saving employee."
+      );
     }
   };
-
+  
+  
+  
   return (
     <div className="modal bg-white p-6 rounded shadow-lg max-w-lg mx-auto">
       <h2 className="text-xl font-semibold mb-4">{selectedEmployee ? "Edit Employee" : "Add Employee"}</h2>
@@ -70,12 +96,13 @@ export default function AddEmployee({ setShowForm, selectedEmployee, fetchEmploy
             </label>
             <input
               id={field}
-              type={field.includes("date") ? "date" : "text"} // Use date input for date fields
+              type={field.includes("date") ? "date" : field.includes("paid") ? "number" : "text"}
               name={field}
               value={formData[field] || ""}
               onChange={handleChange}
               placeholder={field.replace(/([A-Z])/g, " $1")}
               className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label={field}
             />
           </div>
         ))}
