@@ -7,7 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 // import AddEmployee from "./pages/AddEmployee";
 import UpdateEmployee from "./pages/UpdateEmployee";
- 
+import EditProfile from "./pages/EditProfile";
 
 const token = localStorage.getItem("token");
 let user = null;
@@ -40,6 +40,7 @@ const App = () => {
           path="/employee-dashboard"
           element={user?.role === "employee" ? <EmployeeDashboard /> : <Navigate to="/login" />}
         />
+         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/update-employee/:id" element={user ? <UpdateEmployee /> : <Navigate to="/login" />} />
                 <Route path="/view-employee/:id" element={user ? <ViewEmployee /> : <Navigate to="/login" />} />
 

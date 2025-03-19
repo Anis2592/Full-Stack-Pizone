@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { FaUser, FaEnvelope, FaBriefcase, FaCity, FaMapMarkerAlt, FaMoneyBillWave, FaLanguage, FaCalendarAlt, FaSignOutAlt, FaEdit } from "react-icons/fa"; // ✅ Icons
 
 const EmployeeDashboard = () => {
   const [employee, setEmployee] = useState(null);
@@ -38,33 +39,49 @@ const EmployeeDashboard = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-semibold text-center mb-6">Employee Dashboard</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">👤 Employee Dashboard</h1>
 
+        {/* Logout Button */}
         <button
-          onClick={() => { localStorage.removeItem("token"); navigate("/login"); }}
-          className="w-full py-2 bg-red-600 text-white rounded-lg mb-4"
+          onClick={() => {
+            localStorage.removeItem("token");
+            navigate("/login");
+          }}
+          className="w-full flex items-center justify-center gap-2 py-3 bg-red-600 text-white font-semibold rounded-lg mb-4 transition duration-300 hover:bg-red-700"
         >
-          Logout
+          <FaSignOutAlt /> Logout
         </button>
 
-        {loading ? <p className="text-center">Loading...</p> : error ? <p className="text-center text-red-500">{error}</p> : (
-          <div>
-            <p><strong>Name:</strong> {employee.name}</p>
-            <p><strong>Email:</strong> {employee.emailid}</p>
-            <p><strong>Job Title:</strong> {employee.jobTitle || "Not Assigned"}</p>
-            <p><strong>City:</strong> {employee.city}</p>
-            <p><strong>State:</strong> {employee.state}</p>
-            <p><strong>Payment Method:</strong> {employee.paymentMethod}</p>
-            <p><strong>Language:</strong> {employee.language}</p>
-            <p><strong>Paid Vacation Days:</strong> {employee.paidVacationDays}</p>
-            <p><strong>Paid Sick Days:</strong> {employee.paidSickDays}</p>
-            <p><strong>Date of Birth:</strong> {new Date(employee.dateofbirth).toLocaleDateString()}</p>
-            <p><strong>Date of Joining:</strong> {new Date(employee.dateofjoining).toLocaleDateString()}</p>
-            <button className="w-full py-2 bg-blue-600 text-white rounded-lg mt-4"
-              onClick={() => navigate("/edit-profile")}>
-              Edit Profile
+        {/* Loading & Error Handling */}
+        {loading ? (
+          <p className="text-center text-gray-600">Loading...</p>
+        ) : error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : (
+          <div className="space-y-4">
+            {/* Employee Info */}
+            <div className="bg-gray-100 p-4 rounded-lg shadow-inner">
+              <p className="text-lg flex items-center gap-2"><FaUser className="text-blue-500" /> <strong>Name:</strong> {employee.name}</p>
+              <p className="text-lg flex items-center gap-2"><FaEnvelope className="text-blue-500" /> <strong>Email:</strong> {employee.emailid || "N/A"}</p>
+              <p className="text-lg flex items-center gap-2"><FaBriefcase className="text-blue-500" /> <strong>Job Title:</strong> {employee.jobTitle || "Not Assigned"}</p>
+              <p className="text-lg flex items-center gap-2"><FaCity className="text-blue-500" /> <strong>City:</strong> {employee.city}</p>
+              <p className="text-lg flex items-center gap-2"><FaMapMarkerAlt className="text-blue-500" /> <strong>State:</strong> {employee.state}</p>
+              <p className="text-lg flex items-center gap-2"><FaMoneyBillWave className="text-blue-500" /> <strong>Payment Method:</strong> {employee.paymentMethod}</p>
+              <p className="text-lg flex items-center gap-2"><FaLanguage className="text-blue-500" /> <strong>Language:</strong> {employee.language}</p>
+              <p className="text-lg flex items-center gap-2"><FaCalendarAlt className="text-blue-500" /> <strong>Paid Vacation Days:</strong> {employee.paidVacationDays}</p>
+              <p className="text-lg flex items-center gap-2"><FaCalendarAlt className="text-blue-500" /> <strong>Paid Sick Days:</strong> {employee.paidSickDays}</p>
+              <p className="text-lg flex items-center gap-2"><FaCalendarAlt className="text-blue-500" /> <strong>Date of Birth:</strong> {employee.dateofbirth ? new Date(employee.dateofbirth).toLocaleDateString() : "N/A"}</p>
+              <p className="text-lg flex items-center gap-2"><FaCalendarAlt className="text-blue-500" /> <strong>Date of Joining:</strong> {employee.dateofjoining ? new Date(employee.dateofjoining).toLocaleDateString() : "N/A"}</p>
+            </div>
+
+            {/* Edit Profile Button */}
+            <button
+              className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white font-semibold rounded-lg mt-4 transition duration-300 hover:bg-blue-700"
+              onClick={() => navigate("/edit-profile")}
+            >
+              <FaEdit /> Edit Profile
             </button>
           </div>
         )}
