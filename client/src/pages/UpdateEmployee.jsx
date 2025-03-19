@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode"; // ✅ Use safer decoding
+import { FaSave, FaArrowLeft } from "react-icons/fa"; // ✅ Icons
 
 const EditEmployee = () => {
   const [formData, setFormData] = useState({
@@ -98,35 +98,54 @@ const EditEmployee = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-bold text-center mb-4">{user?.role === "admin" ? "Edit Employee" : "Edit Profile"}</h2>
-      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {Object.keys(formData).map((field) => (
-          <div key={field}>
-            <label className="block text-gray-700">{field.replace(/([A-Z])/g, " $1")}</label>
-            <input
-              type={field.includes("date") ? "date" : "text"}
-              name={field}
-              value={formData[field] || ""}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
-            />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 p-6">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-lg">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          {user?.role === "admin" ? "✏️ Edit Employee" : "✏️ Edit Profile"}
+        </h2>
+
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+        {/* Edit Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {Object.keys(formData).map((field) => (
+            <div key={field}>
+              <label className="block text-gray-700 font-medium">{field.replace(/([A-Z])/g, " $1")}</label>
+              <input
+                type={field.includes("date") ? "date" : "text"}
+                name={field}
+                value={formData[field] || ""}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          ))}
+
+          {/* Save & Back Buttons */}
+          <div className="flex justify-between gap-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-md transition duration-200 hover:bg-blue-700 disabled:bg-gray-400"
+            >
+              <FaSave /> {loading ? "Saving..." : "Save Changes"}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex-1 flex items-center justify-center gap-2 bg-gray-600 text-white py-2 rounded-md transition duration-200 hover:bg-gray-700"
+            >
+              <FaArrowLeft /> Cancel
+            </button>
           </div>
-        ))}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition duration-200 disabled:bg-gray-400"
-        >
-          {loading ? "Updating..." : "Update"}
-        </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
 
 export default EditEmployee;
+
 
 // import { useState, useEffect } from "react";
 // import axios from "axios";
