@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react";
 import AdminDashboard from "./pages/AdminDashboard";
 import ViewEmployee from "./pages/ViewEmployee";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import AddEmployee from "./pages/AddEmployee";
+// import AddEmployee from "./pages/AddEmployee";
 import UpdateEmployee from "./pages/UpdateEmployee";
  
 

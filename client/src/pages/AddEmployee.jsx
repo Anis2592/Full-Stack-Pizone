@@ -1,5 +1,3 @@
- 
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -24,8 +22,8 @@ export default function AddEmployee({ setShowForm, selectedEmployee, fetchEmploy
     if (selectedEmployee) {
       setFormData({
         ...selectedEmployee,
-        dateofbirth: selectedEmployee.dateofbirth ? selectedEmployee.dateofbirth.split("T")[0] : "",
-        dateofjoining: selectedEmployee.dateofjoining ? selectedEmployee.dateofjoining.split("T")[0] : "",
+        dateOfBirth: selectedEmployee.dateOfBirth ? selectedEmployee.dateOfBirth.split("T")[0] : "",
+        dateOfJoining: selectedEmployee.dateOfJoining ? selectedEmployee.dateOfJoining.split("T")[0] : "",
       });
     } else {
       setFormData(initialFormState);
@@ -42,49 +40,49 @@ export default function AddEmployee({ setShowForm, selectedEmployee, fetchEmploy
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const updatedFormData = {
       ...formData,
-      dateOfBirth: formData.dateOfBirth
-        ? new Date(formData.dateOfBirth).toISOString().split("T")[0]
-        : "",
-      dateOfJoining: formData.dateOfJoining
-        ? new Date(formData.dateOfJoining).toISOString().split("T")[0]
-        : "",
+      dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString().split("T")[0] : "",
+      dateOfJoining: formData.dateOfJoining ? new Date(formData.dateOfJoining).toISOString().split("T")[0] : "",
     };
-  
+
     console.log("🚀 Sending Data:", updatedFormData);
-  
+
     try {
       const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
       const token = localStorage.getItem("token");
-  
+
       const response = await axios.post(`${API_URL}/api/employee`, updatedFormData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       console.log("✅ Employee Added Successfully:", response.data);
-  
-      if (typeof setShowForm !== "function") {
-        console.error("❌ setShowForm is not a function");
-      } else {
+
+      // Check if setShowForm is a function before calling
+      if (typeof setShowForm === "function") {
         setShowForm(false);
+      } else {
+        console.error("❌ setShowForm is not a function");
       }
-  
-      fetchEmployees(); // Refresh the employee list
-      setShowForm(false)
+
+      // Ensure fetchEmployees exists before calling
+      if (typeof fetchEmployees === "function") {
+        fetchEmployees(); // Refresh employee list
+      } else {
+        console.error("❌ fetchEmployees is not a function");
+      }
+      
     } catch (error) {
       console.error("❌ Error saving employee:", error.response ? error.response.data : error.message);
       alert(
         error.response
           ? `Error: ${JSON.stringify(error.response.data, null, 2)}`
-          : " saving employee."
+          : "Error saving employee."
       );
     }
   };
-  
-  
-  
+
   return (
     <div className="modal bg-white p-6 rounded shadow-lg max-w-lg mx-auto">
       <h2 className="text-xl font-semibold mb-4">{selectedEmployee ? "Edit Employee" : "Add Employee"}</h2>

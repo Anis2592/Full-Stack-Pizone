@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {jwtDecode} from 'jwt-decode'; // Import jwt-decode to decode token
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,9 +10,21 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Check if the user is already logged in
   useEffect(() => {
-    if (localStorage.getItem('token')) {
-      navigate('/dashboard');
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.role === 'admin') {
+          navigate('/admin-dashboard');
+        } else {
+          navigate('/employee-dashboard');
+        }
+      } catch (err) {
+        console.error('Invalid token:', err);
+        localStorage.removeItem('token');
+      }
     }
   }, [navigate]);
 
@@ -24,13 +37,18 @@ const Login = () => {
       const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
 
       if (response.status === 200) {
-        localStorage.setItem('token', response.data.token);
-        const user = response.data.user;
+        const token = response.data.token;
+        localStorage.setItem('token', token);
 
-        if (user.role === 'admin') {
-          navigate('/admin dashboard');
+        // Decode the token to get the role
+        const decoded = jwtDecode(token);
+        const userRole = decoded.role;
+
+        // Redirect based on user role
+        if (userRole === 'admin') {
+          navigate('/admin-dashboard');
         } else {
-          navigate('/employee dashboard');
+          navigate('/employee-dashboard');
         }
       }
     } catch (err) {
