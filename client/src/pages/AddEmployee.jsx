@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Sidebar from "./Sidebar"; // ✅ Import Sidebar
 
 export default function AddEmployee({ setShowForm, selectedEmployee, fetchEmployees }) {
   const initialFormState = {
@@ -59,16 +60,14 @@ export default function AddEmployee({ setShowForm, selectedEmployee, fetchEmploy
 
       console.log("✅ Employee Added Successfully:", response.data);
 
-      // Check if setShowForm is a function before calling
       if (typeof setShowForm === "function") {
         setShowForm(false);
       } else {
         console.error("❌ setShowForm is not a function");
       }
 
-      // Ensure fetchEmployees exists before calling
       if (typeof fetchEmployees === "function") {
-        fetchEmployees(); // Refresh employee list
+        fetchEmployees();
       } else {
         console.error("❌ fetchEmployees is not a function");
       }
@@ -84,39 +83,41 @@ export default function AddEmployee({ setShowForm, selectedEmployee, fetchEmploy
   };
 
   return (
-    <div className="modal bg-white p-6 rounded shadow-lg max-w-lg mx-auto">
-      <h2 className="text-xl font-semibold mb-4">{selectedEmployee ? "Edit Employee" : "Add Employee"}</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {Object.keys(initialFormState).map((field) => (
-          <div key={field}>
-            <label htmlFor={field} className="block text-sm font-medium text-gray-700">
-              {field.replace(/([A-Z])/g, " $1")}
-            </label>
-            <input
-              id={field}
-              type={field.includes("date") ? "date" : field.includes("paid") ? "number" : "text"}
-              name={field}
-              value={formData[field] || ""}
-              onChange={handleChange}
-              placeholder={field.replace(/([A-Z])/g, " $1")}
-              className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label={field}
-            />
-          </div>
-        ))}
-        <div className="flex justify-between space-x-4">
-          <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-            {selectedEmployee ? "Update" : "Add"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowForm(false)}
-            className="bg-gray-500 text-white px-6 py-2 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
-          >
-            Cancel
-          </button>
+    <div className="flex h-screen">
+      {/* ✅ Sidebar */}
+      <Sidebar />
+
+      {/* ✅ Main Content Area */}
+      <div className="flex-1 p-6 ml-64 bg-gray-100">
+        <div className="bg-white p-6 rounded shadow-lg max-w-lg mx-auto">
+          <h2 className="text-xl font-semibold mb-4">{selectedEmployee ? "Edit Employee" : "Add Employee"}</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {Object.keys(initialFormState).map((field) => (
+              <div key={field}>
+                <label htmlFor={field} className="block text-sm font-medium text-gray-700">
+                  {field.replace(/([A-Z])/g, " $1")}
+                </label>
+                <input
+                  id={field}
+                  type={field.includes("date") ? "date" : field.includes("paid") ? "number" : "text"}
+                  name={field}
+                  value={formData[field] || ""}
+                  onChange={handleChange}
+                  placeholder={field.replace(/([A-Z])/g, " $1")}
+                  className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label={field}
+                />
+              </div>
+            ))}
+            <div className="flex justify-between space-x-4">
+              <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                {selectedEmployee ? "Update" : "Add"}
+              </button>
+              
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

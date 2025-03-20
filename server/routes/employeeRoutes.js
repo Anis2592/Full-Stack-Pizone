@@ -99,11 +99,18 @@ router.post(
   }
 );
 
-// ✅ Update employee details (Admin Only)
-router.put("/:id", verifyAdmin, validateObjectId, async (req, res) => {
+// ✅ Update employee details (Admin or Employee Self-Update)
+router.put("/:id", authMiddleware, validateObjectId, async (req, res) => {
   try {
+    const employee = await Employee.findById(req.params.id);
+    if (!employee) return res.status(404).json({ message: "Employee not found" });
+
+    // Check if the user is an admin or the employee themself
+    if (req.user.role !== "admin" && employee.emailid !== req.user.email) {
+      return res.status(403).json({ message: "You can only update your own details" });
+    }
+
     const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedEmployee) return res.status(404).json({ message: "Employee not found" });
 
     res.status(200).json({ message: "Employee updated successfully", employee: updatedEmployee });
   } catch (error) {
@@ -111,6 +118,20 @@ router.put("/:id", verifyAdmin, validateObjectId, async (req, res) => {
     res.status(500).json({ message: "Error updating employee" });
   }
 });
+
+
+// ✅ Update employee details (Admin Only)
+// router.put("/:id", verifyAdmin, validateObjectId, async (req, res) => {
+//   try {
+//     const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
+//     if (!updatedEmployee) return res.status(404).json({ message: "Employee not found" });
+
+//     res.status(200).json({ message: "Employee updated successfully", employee: updatedEmployee });
+//   } catch (error) {
+//     console.error("Error updating employee:", error);
+//     res.status(500).json({ message: "Error updating employee" });
+//   }
+// });
 
 // ✅ Delete employee (Admin Only)
 router.delete("/:id", verifyAdmin, validateObjectId, async (req, res) => {

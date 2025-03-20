@@ -5,7 +5,7 @@ import ViewEmployee from "./pages/ViewEmployee";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-// import AddEmployee from "./pages/AddEmployee";
+import AddEmployee from "./pages/AddEmployee";
 import UpdateEmployee from "./pages/UpdateEmployee";
 import EditProfile from "./pages/EditProfile";
 
@@ -43,6 +43,7 @@ const App = () => {
          <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/update-employee/:id" element={user ? <UpdateEmployee /> : <Navigate to="/login" />} />
                 <Route path="/view-employee/:id" element={user ? <ViewEmployee /> : <Navigate to="/login" />} />
+                <Route path="/add-employee" element={<AddEmployee />} />
 
         {/* ✅ Catch-All Redirect */}
         <Route path="*" element={<Navigate to="/login" />} />
